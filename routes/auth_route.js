@@ -1,7 +1,10 @@
 const express  = require("express")
 const path     = require("path")
+const fs       = require("fs")
 const router   = express.Router()
-const { signup, login } = require(path.join(__dirname,"..","controller","auth_cont.js"))
+const jwt      = require('jsonwebtoken')
+const SECRET   = "shlok"
+const { signup, login ,findUserFromToken} = require(path.join(__dirname, "..", "controller", "auth_cont.js"))
 
 // Body parser middleware
 router.use(express.urlencoded({ extended: true }))
@@ -9,6 +12,7 @@ router.use(express.json())
 
 // ---- SERVE HTML PAGES ----
 router.get("/", (req, res) => {
+  findUserFromToken(req,res);
   res.sendFile(path.join(__dirname, "..", "auth view", "Choice.html"))
 })
 
@@ -25,3 +29,4 @@ router.post("/sign",  signup)
 router.post("/login", login)
 
 module.exports = router
+

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — StockPulse</title>
+  <link rel="stylesheet" href="dashboard.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+    <script src = "/socket.io/socket.io.js"></script>
+  <!-- ============================================================
+       TOP TICKER BAR — live prices of major stocks
+       ============================================================ -->
+  <header class="ticker-header">
+    <div class="ticker-brand">
+      <svg viewBox="0 0 32 32" fill="none" class="brand-svg">
+        <polyline points="3,24 9,14 14,18 20,8 27,12" stroke="#FF6A00" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="27" cy="12" r="2" fill="#FF6A00"/>
+        <line x1="3" y1="27" x2="29" y2="27" stroke="#FF6A00" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <span class="brand-name">StockPulse</span>
+    </div>
+
+    <!-- Live ticker strip -->
+    <div class="ticker-strip">
+      <!-- These prices update via JS -->
+      <div class="ticker-item" id="tick-RELIANCE">
+        <span class="tick-symbol">RELIANCE</span>
+        <span class="tick-price" id="price-RELIANCE">₹2,847.50</span>
+        <span class="tick-change up" id="change-RELIANCE">▲ +1.24%</span>
+      </div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item" id="tick-AAPL">
+        <span class="tick-symbol">AAPL</span>
+        <span class="tick-price" id="price-AAPL">$250.12</span>
+        <span class="tick-change up" id="change-AAPL">▲ +0.84%</span>
+      </div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item" id="tick-TSLA">
+        <span class="tick-symbol">TSLA</span>
+        <span class="tick-price" id="price-TSLA">$244.30</span>
+        <span class="tick-change down" id="change-TSLA">▼ -1.12%</span>
+      </div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item" id="tick-NVDA">
+        <span class="tick-symbol">NVDA</span>
+        <span class="tick-price" id="price-NVDA">$481.55</span>
+        <span class="tick-change up" id="change-NVDA">▲ +2.31%</span>
+      </div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item" id="tick-TCS">
+        <span class="tick-symbol">TCS</span>
+        <span class="tick-price" id="price-TCS">₹3,542.00</span>
+        <span class="tick-change down" id="change-TCS">▼ -0.55%</span>
+      </div>
+      <div class="ticker-sep">|</div>
+      <div class="ticker-item" id="tick-SONY">
+        <span class="tick-symbol">SONY</span>
+        <span class="tick-price" id="price-SONY">¥12,450</span>
+        <span class="tick-change up" id="change-SONY">▲ +0.92%</span>
+      </div>
+    </div>
+
+    <!-- Nav right -->
+    <div class="header-nav">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
+      <a href="/watchlist" class="nav-btn">Watchlist</a>
+      <a href="/logout" class="nav-btn nav-btn--outline">Logout</a>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAIN LAYOUT — sidebar + content
+       ============================================================ -->
+  <div class="page-layout">
+
+    <!-- ---- LEFT SIDEBAR ---- -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <p class="sidebar-label">MARKETS</p>
+        <nav class="sidebar-nav">
+          <a href="/india"     class="sidebar-link active" data-market="india">
+            <span class="flag">🇮🇳</span> India
+          </a>
+          <a href="/usa"       class="sidebar-link" data-market="usa">
+            <span class="flag">🇺🇸</span> USA
+          </a>
+          <a href="/japan"     class="sidebar-link" data-market="japan">
+            <span class="flag">🇯🇵</span> Japan
+          </a>
+          <a href="/korea"     class="sidebar-link" data-market="korea">
+            <span class="flag">🇰🇷</span> Korea
+          </a>
+          <a href="/uk"        class="sidebar-link" data-market="uk">
+            <span class="flag">🇬🇧</span> United Kingdom
+          </a>
+          <a href="/germany"   class="sidebar-link" data-market="germany">
+            <span class="flag">🇩🇪</span> Germany
+          </a>
+          <a href="/china"     class="sidebar-link" data-market="china">
+            <span class="flag">🇨🇳</span> China
+          </a>
+          <a href="/australia" class="sidebar-link" data-market="australia">
+            <span class="flag">🇦🇺</span> Australia
+          </a>
+          <a href="/canada"    class="sidebar-link" data-market="canada">
+            <span class="flag">🇨🇦</span> Canada
+          </a>
+          <a href="/brazil"    class="sidebar-link" data-market="brazil">
+            <span class="flag">🇧🇷</span> Brazil
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label">CATEGORIES</p>
+        <nav class="sidebar-nav">
+          <a href="#" class="sidebar-link">📈 Top Gainers</a>
+          <a href="#" class="sidebar-link">📉 Top Losers</a>
+          <a href="#" class="sidebar-link">🔥 Most Active</a>
+          <a href="#" class="sidebar-link">💎 Large Cap</a>
+          <a href="#" class="sidebar-link">🚀 Small Cap</a>
+          <a href="#" class="sidebar-link">💻 Technology</a>
+          <a href="#" class="sidebar-link">🏦 Banking</a>
+          <a href="#" class="sidebar-link">⚡ Energy</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- ---- MAIN CONTENT ---- -->
+    <main class="main-content">
+
+      <!-- Search bar -->
+      <div class="search-wrap">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search stocks — AAPL, RELIANCE, TSLA..."
+            autocomplete="off"
+          />
+          <button class="search-btn" id="searchBtn">Search</button>
+        </div>
+        <!-- Search suggestions dropdown -->
+        <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+
+      <!-- Section heading -->
+      <div class="section-header">
+        <h2 class="section-title">Your Stocks</h2>
+        <span class="section-sub" id="stockCount">0 stocks tracked</span>
+      </div>
+
+      <!-- ============================================================
+           STOCK CARDS GRID
+           ▼▼▼ THIS IS WHERE YOU APPEND STOCK CARDS ▼▼▼
+           Use JavaScript: document.getElementById('stockGrid')
+           ============================================================ -->
+      <div class="stock-grid" id="stockGrid">
+
+        <!-- ============================================================
+             EXAMPLE CARD — pre-appended so you can see the design
+             Remove this when connecting to real data
+             ============================================================ -->
+        <div class="stock-card" id="card-RELIANCE">
+          <div class="card-top">
+            <div class="card-info">
+              <span class="card-symbol">RELIANCE</span>
+              <span class="card-name">Reliance Industries</span>
+              <span class="card-exchange">NSE · India 🇮🇳</span>
+            </div>
+            <div class="card-badge up">▲ LIVE</div>
+          </div>
+
+          <div class="card-price-wrap">
+            <span class="card-price" id="live-RELIANCE">₹2,847.50</span>
+            <span class="card-change up" id="chg-RELIANCE">▲ +34.20 (+1.24%)</span>
+          </div>
+
+          <div class="card-stats">
+            <div class="stat">
+              <span class="stat-l">Open</span>
+              <span class="stat-v">₹2,813.30</span>
+            </div>
+            <div class="stat">
+              <span class="stat-l">High</span>
+              <span class="stat-v up">₹2,865.00</span>
+            </div>
+            <div class="stat">
+              <span class="stat-l">Low</span>
+              <span class="stat-v down">₹2,800.10</span>
+            </div>
+            <div class="stat">
+              <span class="stat-l">Vol</span>
+              <span class="stat-v">4.2M</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-action btn-view" onclick="viewMore('RELIANCE')">View More</button>
+            <button class="btn-action btn-watch" onclick="addWatch('RELIANCE')">+ Watchlist</button>
+          </div>
+        </div>
+        <!-- ============================================================
+             END EXAMPLE CARD
+             ============================================================ -->
+
+      </div>
+      <!-- ============================================================
+           ▲▲▲ END OF STOCK CARDS GRID ▲▲▲
+           id="stockGrid" — append cards here
+           ============================================================ -->
+
+      <!-- Empty state — shown when no stocks -->
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div class="empty-icon">📊</div>
+        <p class="empty-title">No stocks added yet</p>
+        <p class="empty-sub">Search for a stock above and add it to your dashboard</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

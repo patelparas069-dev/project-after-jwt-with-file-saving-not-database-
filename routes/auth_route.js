@@ -4,24 +4,34 @@ const fs       = require("fs")
 const router   = express.Router()
 const jwt      = require('jsonwebtoken')
 const SECRET   = "shlok"
-const { signup, login ,findUserFromToken} = require(path.join(__dirname, "..", "controller", "auth_cont.js"))
+const { signup, login ,findUserFromToken,verifyUserFromToken} = require(path.join(__dirname, "..","database", "db_func"));
 
 // Body parser middleware
 router.use(express.urlencoded({ extended: true }))
 router.use(express.json())
 
-// ---- SERVE HTML PAGES ----
-router.get("/", (req, res) => {
-  findUserFromToken(req,res);
-  res.sendFile(path.join(__dirname, "..", "auth view", "Choice.html"))
+router.get("/", async (req,res)=>{
+  if(await verifyUserFromToken(req,res)){
+    return res.redirect("/dashboard")
+  }
+  else{
+  res.sendFile(path.join(__dirname, "..", "auth view", "Choice.html"))}
 })
 
-router.get("/sign", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "auth view", "sign.html"))
+router.get("/sign", async (req,res)=>{
+  if(await verifyUserFromToken(req,res) === true){
+    res.redirect("/dashboard")
+  }
+  else{
+  res.sendFile(path.join(__dirname, "..", "auth view", "sign.html"))}
 })
 
-router.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "auth view", "login.html"))
+router.get("/login", async (req,res)=>{
+  if(await verifyUserFromToken(req,res) === true){
+    res.redirect("/dashboard")
+  }
+  else{
+  res.sendFile(path.join(__dirname, "..", "auth view", "login.html"))}
 })
 
 // ---- HANDLE FORM POSTS ----

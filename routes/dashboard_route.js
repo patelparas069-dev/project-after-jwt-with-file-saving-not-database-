@@ -15,7 +15,7 @@ router.get("/dashboard",(req,res,next)=>{
   try {
     const decoded = jwt.verify(token, SECRET)
     console.log(decoded)
-    res.send(`<p>hi</p>`)
+    res.sendFile(path.join(__dirname,"..","auth view","dashboard.html"))
 
   } catch (err) {
     console.log(err);

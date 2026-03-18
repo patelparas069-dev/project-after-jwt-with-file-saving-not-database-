@@ -1,3 +1,4 @@
+require('dotenv').config();   // ✅ MUST BE FIRST LINE
 const express      = require("express")
 const app          = express()
 const path         = require("path")
@@ -9,7 +10,7 @@ const { Server }   = require("socket.io")
 
 const SECRET = "shlok"
 
-const { getStockLiveData, getAllLivePrices } = require(
+const { getStockLiveData, YAHOO_SYMBOLS } = require(
   path.join(__dirname, "controller", "dashboard_cont.js")
 )
 
@@ -44,41 +45,40 @@ io.on("connection", (socket) => {
   let loopStarted = false
 
   socket.on("stock_list", async (STOCKS) => {
-
     if (loopStarted) return
     loopStarted = true
 
-    try {
-      const firstPrices = await getAllLivePrices(STOCKS)
-      if (isRunning) {
-        // Send real prices immediately
-        socket.emit("imp_shares", firstPrices)
-        console.log("Initial prices sent to:", socket.user.username)
-      }
-    } catch (err) {
-      console.log("First fetch error:", err.message)
-    }
-
-    async function fetchLoop() {
+    // ✅ Fetch and emit each stock individually as soon as it arrives
+    async function fetchAndEmitAll() {
       if (!isRunning) return
 
-      try {
-        const updatedPrices = await getAllLivePrices(STOCKS)
+      for (const key of Object.keys(STOCKS)) {
+        if (!isRunning) return  // stop mid-loop if disconnected
 
-        if (!isRunning) return
+        const yahooSymbol = YAHOO_SYMBOLS[key]
+        if (!yahooSymbol) continue
 
-        // Send real updated prices
-        socket.emit("imp_shares", updatedPrices)
-        console.log("Prices updated for:", socket.user.username, new Date().toLocaleTimeString())
+        try {
+          const data = await getStockLiveData(yahooSymbol)
+          if (!isRunning) return
 
-      } catch (err) {
-        console.log("Price update error:", err.message)
+          if (data && data.livePrice) {
+            // ✅ emit immediately for this one stock — don't wait for others
+            socket.emit("imp_shares", { [key]: data.livePrice })
+          }
+        } catch (err) {
+          console.log(`Error fetching ${key}:`, err.message)
+        }
+
+        // small delay between requests to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 2))
       }
 
-      if (isRunning) setTimeout(fetchLoop, 5000) // Update every 5 seconds
+      // schedule next full cycle after all stocks done
+      if (isRunning) setTimeout(fetchAndEmitAll, 2)
     }
 
-    fetchLoop()
+    fetchAndEmitAll()
   })
 
   socket.on("disconnect", () => {
@@ -87,35 +87,32 @@ io.on("connection", (socket) => {
   })
 })
 
-const uri = "mongodb+srv://shlok4252:BIb81XL0NKIKlAmk@firstcluster.2nbrpjk.mongodb.net/users"
+async function startServer() {
+  try {
+    const uri = "mongodb+srv://shlok4252:BIb81XL0NKIKlAmk@firstcluster.2nbrpjk.mongodb.net/users"
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000 })
+    console.log("✅ Connected to Atlas")
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err.message)
+    process.exit(1)
+  }
 
-mongoose.connect(uri)
-  .then(() => console.log("Connected to Atlas"))
-  .catch((err) => console.log("Connection error:", err))
+  const authRoutes      = require(path.join(__dirname, "routes", "auth_route.js"))
+  const dashboard_route = require(path.join(__dirname, "routes", "dashboard_route.js"))
 
-const authRoutes      = require(path.join(__dirname, "routes", "auth_route.js"))
-const dashboard_route = require(path.join(__dirname, "routes", "dashboard_route.js"))
+  app.use(cookieParser())
+  app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
+  app.use(express.static(path.join(__dirname, "auth view")))
+  app.use((req, res, next) => { res.set("Cache-Control", "no-store"); next() })
 
-app.use(cookieParser())
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(express.static(path.join(__dirname, "auth view")))
-app.use((req, res, next) => {
-  res.set("Cache-Control", "no-store")
-  next()
-})
+  app.use(authRoutes)
+  app.use(dashboard_route)
 
-app.use(authRoutes)
-app.use(dashboard_route)
+  server.listen(3004, () => console.log("🚀 Server started on port 3004"))
+}
 
-process.on("uncaughtException", (err) => {
-  console.log("Uncaught Exception:", err.message)
-})
+process.on("uncaughtException",  (err)    => console.log("Uncaught Exception:", err.message))
+process.on("unhandledRejection", (reason) => console.log("Unhandled Rejection:", reason))
 
-process.on("unhandledRejection", (reason) => {
-  console.log("Unhandled Rejection:", reason)
-})
-
-server.listen(3004, () => {
-  console.log("Server started on port 3004")
-})
+startServer()

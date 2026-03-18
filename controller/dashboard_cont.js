@@ -20,23 +20,42 @@ const first = (req, res, next) => {
 }
 
 const YAHOO_SYMBOLS = {
-  RELIANCE: 'RELIANCE.NS',
-  TCS:      'TCS.NS',
-  INFY:     'INFY.NS',
-  HDFCBANK: 'HDFCBANK.NS',
-  WIPRO:    'WIPRO.NS',
-  AAPL:     'AAPL',
-  TSLA:     'TSLA',
-  NVDA:     'NVDA',
-  MSFT:     'MSFT',
-  AMZN:     'AMZN',
-  GOOGL:    'GOOGL',
-  META:     'META',
-  SONY:     'SONY',
-  TOYOTA:   '7203.T',
-  SAMSUNG:  '005930.KS',
-  HSBC:     'HSBC',
-  SAP:      'SAP',
+  // existing ones stay...
+  RELIANCE:   'RELIANCE.NS',
+  TCS:        'TCS.NS',
+  INFY:       'INFY.NS',
+  HDFCBANK:   'HDFCBANK.NS',
+  WIPRO:      'WIPRO.NS',
+  AAPL:       'AAPL',
+  TSLA:       'TSLA',
+  NVDA:       'NVDA',
+  MSFT:       'MSFT',
+  AMZN:       'AMZN',
+  GOOGL:      'GOOGL',
+  META:       'META',
+  SONY:       'SONY',
+  TOYOTA:     '7203.T',
+  SAMSUNG:    '005930.KS',
+  HSBC:       'HSBC',
+  SAP:        'SAP',
+
+  // ✅ ADD THESE
+  ICICIBANK:  'ICICIBANK.NS',
+  SBIN:       'SBIN.NS',
+  HINDUNILVR: 'HINDUNILVR.NS',
+  BAJFINANCE: 'BAJFINANCE.NS',
+  TATAMOTORS: 'TATAMOTORS.BO',
+  NFLX:       'NFLX',
+  AMD:        'AMD',
+  JPM:        'JPM',
+  BAC:        'BAC',
+  XOM:        'XOM',
+  BP:         'BP',
+  BABA:       'BABA',
+  BIDU:       'BIDU',
+  BHP:        'BHP',
+  SHOP:       'SHOP',
+  VALE:       'VALE',
 }
 
 // ---- Market hours in UTC minutes ----
@@ -181,4 +200,4 @@ async function getAllLivePrices(STOCKS) {
   return result
 }
 
-module.exports = { first, getStockLiveData, getAllLivePrices }
+module.exports = { first, getStockLiveData, getAllLivePrices ,YAHOO_SYMBOLS}
